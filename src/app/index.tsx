@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   FlatList,
@@ -27,141 +28,242 @@ const COLORS = {
   text: "#0F172A", 
   textSecondary: "#64748B", 
 }; 
-export default function HomeScreen() {
-  const [products, setProducts] = useState<Product[]>([]);
+export default function HomeScreen() {const GITHUB_JSON_URL =
+  "https://raw.githubusercontent.com/SupanutKU/MyProfileApp/main/src/app/data/products.json";
 
-  useEffect(() => {
-    fetch(
-      "https://raw.githubusercontent.com/SupanutKU/MyProfileApp/main/src/app/data/products.json"
-    )
-      .then((response) => response.json())
-      .then((data) => setProducts(data))
-      .catch((error) => console.log("Error:", error));
-  }, []); 
-  return ( 
-    <SafeAreaView style={styles.container}> 
-      <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor={COLORS.background} 
-      /> 
- 
-      {/* Header */} 
-      <View style={styles.header}> 
-        <TouchableOpacity style={styles.iconButton}> 
-          <Ionicons name="menu" size={24} 
-color={COLORS.text} /> 
-        </TouchableOpacity> 
- 
-        <Text style={styles.headerTitle}>Products</Text> 
- 
-        <TouchableOpacity style={styles.profileButton}> 
-          <Ionicons name="person" size={18} color="#fff" 
-/> 
-        </TouchableOpacity> 
-      </View> 
- 
-      {/* Search */} 
-      <View style={styles.searchRow}> 
-        <View style={styles.searchBox}> 
-          <Ionicons 
-            name="search" 
-            size={18} 
-            color={COLORS.textSecondary} 
-          /> 
- 
-          <TextInput 
-            placeholder="Search products..." 
-            placeholderTextColor={COLORS.textSecondary} 
-            style={styles.input} 
-          /> 
-        </View> 
- 
-        <TouchableOpacity style={styles.addButton}> 
-          <Text style={styles.addButtonText}>+ Add 
-Product</Text> 
-        </TouchableOpacity> 
-      </View> 
- 
-      {/* Filter */} 
-      <View style={styles.filterRow}> 
-        <TouchableOpacity style={styles.filterButton}> 
-          <Text style={styles.filterText}>Filter ▼</Text> 
-        </TouchableOpacity> 
-      </View> 
- 
-      {/* Product Area */}  
-      <FlatList
-  data={products}
-  keyExtractor={(item) => item.id}
-  showsVerticalScrollIndicator={false}
-  contentContainerStyle={{ paddingBottom: 90 }}
-  renderItem={({ item }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+const [products, setProducts] = useState<Product[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
 
-      <Text style={styles.name}>{item.name}</Text>
+const fetchProducts = async () => {
+  setLoading(true);
+  setError("");
 
-      <Text style={styles.brand}>{item.brand}</Text>
+  try {
+    const url = `${GITHUB_JSON_URL}?t=${Date.now()}`;
 
-      <Text style={styles.price}>{item.price}</Text>
+    const response = await fetch(url, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data: Product[] = await response.json();
+
+    setProducts(data);
+  } catch (err) {
+    setProducts([]);
+    setError("ไม่สามารถโหลดข้อมูลจาก GitHub ได้");
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchProducts();
+}, []);
+
+return (
+  <SafeAreaView style={styles.container}>
+    <StatusBar
+      barStyle="dark-content"
+      backgroundColor={COLORS.background}
+    />
+
+    {/* Header */}
+    <View style={styles.header}>
+      <TouchableOpacity style={styles.iconButton}>
+        <Ionicons
+          name="menu"
+          size={24}
+          color={COLORS.text}
+        />
+      </TouchableOpacity>
+
+      <Text style={styles.headerTitle}>
+        Products
+      </Text>
+
+      <TouchableOpacity style={styles.profileButton}>
+        <Ionicons
+          name="person"
+          size={18}
+          color="#fff"
+        />
+      </TouchableOpacity>
     </View>
-  )}
-/>
-      {/* Bottom Navigation */} 
-      <View style={styles.bottomNav}> 
-        <TouchableOpacity style={styles.navItem}> 
-          <Ionicons 
-            name="home" 
-            size={24} 
-            color={COLORS.textSecondary} 
-          /> 
-          <Text style={styles.navText}>Home</Text> 
-        </TouchableOpacity> 
- 
-        <TouchableOpacity style={styles.navItem}> 
-          <Ionicons 
-            name="add-circle" 
-            size={30} 
-            color={COLORS.primary} 
-          /> 
-          <Text 
-            style={[ 
-              styles.navText, 
-              { color: COLORS.primary, fontWeight: "600" }, 
-            ]} 
-          > 
-            Add 
-          </Text> 
-        </TouchableOpacity> 
- 
-        <TouchableOpacity style={styles.navItem}> 
-          <MaterialIcons 
-            name="inventory-2" 
-            size={24} 
-            color={COLORS.primary} 
-          /> 
-          <Text 
-            style={[ 
-              styles.navText, 
-              { color: COLORS.primary, fontWeight: "600" }, 
-            ]} 
-          > 
-            Products 
-          </Text> 
-        </TouchableOpacity> 
- 
-        <TouchableOpacity style={styles.navItem}> 
-          <Ionicons 
-            name="folder" 
-            size={24} 
-            color={COLORS.textSecondary} 
-          /> 
-          <Text style={styles.navText}>Categories</Text> 
-        </TouchableOpacity> 
-      </View> 
-    </SafeAreaView> 
-  ); 
-} 
+
+    {/* Search */}
+    <View style={styles.searchRow}>
+      <View style={styles.searchBox}>
+        <Ionicons
+          name="search"
+          size={18}
+          color={COLORS.textSecondary}
+        />
+
+        <TextInput
+          placeholder="Search products..."
+          placeholderTextColor={COLORS.textSecondary}
+          style={styles.input}
+        />
+      </View>
+
+      {/* Add Product */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/add")}
+      >
+        <Text style={styles.addButtonText}>
+          + Add Product
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* Filter */}
+    <View style={styles.filterRow}>
+      <TouchableOpacity style={styles.filterButton}>
+        <Text style={styles.filterText}>
+          Filter ▼
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* Product List */}
+    <FlatList
+      data={products}
+      keyExtractor={(item) => item.id}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 90 }}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() =>
+            router.push({
+              pathname: "/detail",
+              params: {
+                id: item.id,
+                name: item.name,
+                brand: item.brand,
+                price: item.price,
+                image: item.image,
+              },
+            })
+          }
+        >
+          <Image
+            source={{ uri: item.image }}
+            style={styles.image}
+          />
+
+          <Text style={styles.name}>
+            {item.name}
+          </Text>
+
+          <Text style={styles.brand}>
+            {item.brand}
+          </Text>
+
+          <Text style={styles.price}>
+            {item.price}
+          </Text>
+        </TouchableOpacity>
+      )}
+    />
+
+    {/* Bottom Navigation */}
+    <View style={styles.bottomNav}>
+
+      {/* Home */}
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => router.push("/")}
+      >
+        <Ionicons
+          name="home"
+          size={24}
+          color={COLORS.primary}
+        />
+        <Text
+          style={[
+            styles.navText,
+            {
+              color: COLORS.primary,
+              fontWeight: "600",
+            },
+          ]}
+        >
+          Home
+        </Text>
+      </TouchableOpacity>
+
+      {/* Add */}
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => router.push("/add")}
+      >
+        <Ionicons
+          name="add-circle"
+          size={30}
+          color={COLORS.primary}
+        />
+        <Text
+          style={[
+            styles.navText,
+            {
+              color: COLORS.primary,
+              fontWeight: "600",
+            },
+          ]}
+        >
+          Add
+        </Text>
+      </TouchableOpacity>
+
+      {/* Products */}
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => router.push("/")}
+      >
+        <MaterialIcons
+          name="inventory-2"
+          size={24}
+          color={COLORS.primary}
+        />
+        <Text
+          style={[
+            styles.navText,
+            {
+              color: COLORS.primary,
+              fontWeight: "600",
+            },
+          ]}
+        >
+          Products
+        </Text>
+      </TouchableOpacity>
+
+      {/* Categories */}
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => router.push("/categories")}
+      >
+        <Ionicons
+          name="folder"
+          size={24}
+          color={COLORS.textSecondary}
+        />
+        <Text style={styles.navText}>
+          Categories
+        </Text>
+      </TouchableOpacity>
+
+    </View>
+  </SafeAreaView>
+);} 
  
 const styles = StyleSheet.create({ 
   container: { 
