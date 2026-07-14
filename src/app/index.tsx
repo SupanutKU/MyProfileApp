@@ -1,14 +1,13 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
-  FlatList,
-  Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const COLORS = {
@@ -20,33 +19,42 @@ const COLORS = {
   text: "#0F172A",
   textSecondary: "#64748B",
 };
-const products = [
-  {
-    id: "1",
-    name: "Nike Air Force 1",
-    brand: "Nike",
-    price: 4290,
-    image:
-      "https://i8.amplience.net/i/jpl/jd_620178_a?v=1",
-  },
-  {
-    id: "2",
-    name: "Adidas Samba OG",
-    brand: "Adidas",
-    price: 4500,
-    image:
-      "https://assets.adidas.com/images/w_1880,f_auto,q_auto/c81276bc8de04c8aae682f381ac58fe4_9366/ID0478_04_standard.jpg",
-  },
-  {
-    id: "3",
-    name: "Nike Air Jordan 1",
-    brand: "Nike",
-    price: 4900,
-    image:
-      "https://tse2.mm.bing.net/th/id/OIP.H3fRMcs07pRxd6rQy83g-AAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
-  },
-];
+
 export default function HomeScreen() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+
+  loadProducts();
+
+}, []);
+
+
+
+const loadProducts = async () => {
+
+  try {
+
+    const response = await fetch(
+
+      "products.json"
+
+    );
+
+
+
+    const data = await response.json();
+
+    setProducts(data);
+
+  } catch (error) {
+
+    console.log("Load Product Error :", error);
+
+  }
+
+};
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -94,29 +102,6 @@ export default function HomeScreen() {
           <Text style={styles.filterText}>Filter ▼</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Product Area */}
-      <FlatList
-  data={products}
-  keyExtractor={(item) => item.id}
-  contentContainerStyle={{ padding: 16 }}
-  renderItem={({ item }) => (
-    <View style={styles.card}>
-      <Image
-        source={{ uri: item.image }}
-        style={styles.image}
-      />
-
-      <Text style={styles.name}>{item.name}</Text>
-
-      <Text style={styles.brand}>{item.brand}</Text>
-
-      <Text style={styles.price}>
-        ฿ {item.price.toLocaleString()}
-      </Text>
-    </View>
-  )}
-/>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
